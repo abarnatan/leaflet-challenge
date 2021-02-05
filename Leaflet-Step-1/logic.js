@@ -95,6 +95,47 @@ d3.json(queryUrl).then(function(data) {
     collapsed: false
   }).addTo(myMap);
 
+  // Create color function
+function getColor(magnitude) {
+  if (magnitude > 5) {
+      return 'red'
+  } else if (magnitude > 4) {
+      return 'orange'
+  } else if (magnitude > 3) {
+      return 'yellow'
+  } else if (magnitude > 2) {
+      return 'lightgreen'
+  } else if (magnitude > 1) {
+      return 'green'
+  } else {
+      return 'magenta'
+  }
+};
+  // Create Legend
+  var legend = L.control({
+    position: "bottomleft"
+  });
+
+   // details for the legend
+   legend.onAdd = function(map) {
+    var div = L.DomUtil.create("div", "info legend");
+
+    var grades = [0, 1, 2, 3, 4, 5];
+    var colors = [];
+
+
+  // loop through color intervals to put it in the label
+  for (var i = 0; i < grades.length; i++) {
+    div.innerHTML +=
+        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+}
+    return div;
+
+  };
+
+  legend.addTo(myMap)
+
 });
 
 // // https://leafletjs.com/examples/geojson/
