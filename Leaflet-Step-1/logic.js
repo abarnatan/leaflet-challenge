@@ -5,15 +5,51 @@ var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_da
 d3.json(queryUrl).then(function(data) {
   // The data.features object is in the GeoJSON standard
   console.log(data.features);
+      
+  function mapStyle(feature) {
+    return {
+      opacity: 1,
+      fillOpacity: 1,
+      fillColor: mapColor(feature.properties.mag),
+      color: "#000000",
+      radius: mapRadius(feature.properties.mag),
+      stroke: true,
+      weight: 0.5
+    }
+  };
+  function mapColor(mag) {
+    switch (true) {
+      case mag > 5:
+        return "#ea2c2c";
+      case mag > 4:
+        return "#eaa92c";
+      case mag > 3:
+        return "#d5ea2c";
+      case mag > 2:
+        return "#92ea2c";
+      case mag > 1:
+        return "#2ceabf";
+      default:
+        return "#2c99ea";
+    }
+  };
+
+  function mapRadius(mag) {
+    if (mag === 0) {
+      return 1;
+    }
+
+    return mag * 4;
+  };
 
   // This is it! Leaflet knows what to do with 
   // each type of feature (held in the `geometry` key) and draws the correct markers.
-  var earthquakes = L.geoJSON(data.features);
-
-      var earthquakes = L.geoJSON(data.features, {
-        onEachFeature: onEachFeatureFunc,
-        pointToLayer: pointToLayerFunc
-      });
+  var earthquakes = L.geoJSON(data.features, {
+    onEachFeature: onEachFeatureFunc,
+    style: mapStyle,
+    pointToLayer: pointToLayerFunc
+  });
+  
 
   // The rest of this is all the same
   var streetmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -66,7 +102,7 @@ d3.json(queryUrl).then(function(data) {
 // // Define a function we want to run once for each feature in the features array
 // // Give each feature a popup describing the place and time of the earthquake
 function onEachFeatureFunc(feature, layer) {
-  layer.bindPopup("<h3>" + feature.properties.place +
+  layer.bindPopup("<h3> Magnitude:" + feature.properties.mag + "<br>Location: " + feature.properties.place +
     "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
 }
 
@@ -83,11 +119,3 @@ function pointToLayerFunc(feature, latlng) {
   return L.circleMarker(latlng, geojsonMarkerOptions);
 }
 
-
-// // Create a GeoJSON layer containing the features array on the earthquakeData object
-// // Run the onEachFeature function once for each piece of data in the array
-// //   Paste this into the .then() function
-//   var earthquakes = L.geoJSON(data.features, {
-//     onEachFeature: onEachFeatureFunc,
-//     pointToLayer: pointToLayerFunc
-//   });
